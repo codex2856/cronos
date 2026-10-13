@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Cronos">
+  <title>Cronos · Registro de horas</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Cronos</h1>
+    <button id="menuBtn" class="icon-btn" aria-label="Opciones">⋯</button>
+  </header>
+
+  <main>
+    <section id="flash" class="flash" hidden></section>
+
+    <section class="card status">
+      <p id="statusLabel" class="status-label">Fuera del trabajo</p>
+      <p id="statusTimer" class="status-timer">--:--:--</p>
+      <p id="statusSince" class="status-since"></p>
+      <button id="toggleBtn" class="primary">Registrar entrada</button>
+      <p class="hint">También puedes acercar el teléfono al sticker NFC.</p>
+    </section>
+
+    <section class="card">
+      <div class="totals">
+        <div><span class="t-label">Hoy</span><span id="totToday" class="t-val">0h 00m</span></div>
+        <div><span class="t-label">Esta semana</span><span id="totWeek" class="t-val">0h 00m</span></div>
+        <div><span class="t-label">Este mes</span><span id="totMonth" class="t-val">0h 00m</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="list-head">
+        <h2>Historial</h2>
+        <select id="monthSelect" aria-label="Mes"></select>
+      </div>
+      <div id="history"></div>
+    </section>
+  </main>
+
+  <!-- Menú de opciones -->
+  <dialog id="menu" class="sheet">
+    <h2>Opciones</h2>
+    <button data-action="add">➕ Añadir jornada manual</button>
+    <button data-action="csv">📄 Exportar CSV (Excel)</button>
+    <button data-action="backup">💾 Copia de seguridad (JSON)</button>
+    <button data-action="restore">📥 Restaurar copia</button>
+    <button data-action="nfc">📡 Configurar sticker NFC</button>
+    <button data-action="close" class="ghost">Cerrar</button>
+    <input type="file" id="restoreInput" accept="application/json,.json" hidden>
+  </dialog>
+
+  <!-- Editar / añadir jornada -->
+  <dialog id="editor" class="sheet">
+    <form method="dialog" id="editorForm">
+      <h2 id="editorTitle">Editar jornada</h2>
+      <label>Entrada <input type="datetime-local" id="edStart" required></label>
+      <label>Salida <input type="datetime-local" id="edEnd"></label>
+      <label>Nota <input type="text" id="edNote" maxlength="120" placeholder="Opcional"></label>
+      <p id="edError" class="error" hidden></p>
+      <div class="row">
+        <button type="button" id="edDelete" class="danger">Borrar</button>
+        <span class="spacer"></span>
+        <button value="cancel" class="ghost" formnovalidate>Cancelar</button>
+        <button value="save" id="edSave" class="primary small">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Configuración NFC -->
+  <dialog id="nfcDialog" class="sheet">
+    <h2>Configurar sticker NFC</h2>
+    <p>Graba este enlace en el sticker. Cada vez que acerques el teléfono se registrará una entrada o una salida.</p>
+    <code id="tapUrl" class="url"></code>
+    <div class="row">
+      <button id="copyUrl" class="ghost">Copiar enlace</button>
+      <span class="spacer"></span>
+      <button id="writeNfc" class="primary small">Grabar sticker</button>
+    </div>
+    <p id="nfcMsg" class="hint"></p>
+    <p class="hint">“Grabar sticker” solo funciona en Chrome para Android. En iPhone usa la app gratuita
+      <b>NFC Tools</b> → Escribir → Añadir registro → URL, y pega el enlace.</p>
+    <button data-close class="ghost">Cerrar</button>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
