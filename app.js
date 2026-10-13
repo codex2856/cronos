@@ -415,5 +415,16 @@ renderName();
   if (tapped) punch('tap');
 })();
 
+// App instalada (Android): con "focus-existing" el sticker reutiliza la ventana
+// abierta en vez de crear otra, y el enlace llega aquí. El primer aviso es la
+// propia carga de la página, que ya se gestionó arriba.
+if ('launchQueue' in window) {
+  let first = true;
+  window.launchQueue.setConsumer(params => {
+    if (first) { first = false; return; }
+    if (params.targetURL && new URL(params.targetURL).searchParams.has('tap')) punch('tap');
+  });
+}
+
 if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});

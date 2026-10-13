@@ -43,6 +43,8 @@ Abre la app en el móvil y ve a **⋯ → Configurar sticker NFC**. Ahí verás 
 - **Android:** al acercar el teléfono (desbloqueado) se abre Chrome y la app registra la hora sola.
 - **iPhone (XS o más nuevo):** al acercarlo aparece una notificación. Tócala y se abre Safari y registra la hora.
 
+> **Android: para que no se abra una pestaña nueva en cada toque**, instala la app: en Chrome, ⋮ → **Instalar app** (o *Añadir a pantalla de inicio*). Desde entonces el sticker abre la app y reutiliza siempre la misma ventana.
+
 > **iPhone:** no la añadas a la pantalla de inicio. En iPhone, la app de la pantalla de inicio y Safari guardan datos por separado, y el sticker siempre abre Safari. Usa simplemente Safari. Si quieres un acceso directo, guárdala en Favoritos.
 
 ## Varias personas, un mismo sticker
