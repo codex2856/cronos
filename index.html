@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon.svg">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <header class="top">
@@ -58,6 +58,7 @@
     <button data-action="restore">📥 Restaurar copia</button>
     <button data-action="name">👤 Cambiar mi nombre</button>
     <button data-action="nfc">📡 Configurar sticker NFC</button>
+    <button data-action="reset" class="danger">🗑️ Borrar todo el historial</button>
     <button data-action="close" class="ghost">Cerrar</button>
     <input type="file" id="restoreInput" accept="application/json,.json" hidden>
   </dialog>
@@ -106,6 +107,6 @@
     <button data-close class="ghost">Cerrar</button>
   </dialog>
 
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

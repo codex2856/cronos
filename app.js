@@ -333,6 +333,18 @@ $('#restoreInput').addEventListener('change', async e => {
   }
 });
 
+function resetAll() {
+  if (!state.sessions.length) {
+    flash('No hay nada que borrar.');
+    return;
+  }
+  if (!confirm(`¿Borrar las ${state.sessions.length} jornadas registradas en este teléfono? No se puede deshacer.`)) return;
+  state.sessions = [];
+  save();
+  render();
+  flash('Historial borrado. El contador está a cero.');
+}
+
 // ---------- NFC ----------
 function tapUrl() {
   return `${location.origin}${location.pathname}?tap=1`;
@@ -377,6 +389,7 @@ $('#menu').addEventListener('click', e => {
   if (action === 'backup') backup();
   if (action === 'restore') $('#restoreInput').click();
   if (action === 'name') askName();
+  if (action === 'reset') resetAll();
   if (action === 'nfc') {
     $('#tapUrl').textContent = tapUrl();
     $('#nfcMsg').textContent = '';
