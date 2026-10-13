@@ -25,6 +25,31 @@ const openSession = () => state.sessions.find(s => !s.end && !s.forgotten);
 const lastEventTime = () => state.sessions.reduce(
   (max, s) => Math.max(max, Date.parse(s.end || s.start)), 0);
 
+// ---------- Nombre ----------
+// Cada teléfono guarda sus propias horas; el nombre solo sirve para saludar.
+const who = () => (state.name ? `, ${state.name}` : '');
+
+function askName() {
+  return new Promise(resolve => {
+    const dlg = $('#nameDialog');
+    $('#nameInput').value = state.name || '';
+    dlg.showModal();
+    dlg.addEventListener('close', () => {
+      const name = $('#nameInput').value.trim();
+      if (name) {
+        state.name = name;
+        save();
+      }
+      renderName();
+      resolve();
+    }, { once: true });
+  });
+}
+
+function renderName() {
+  $('#greeting').textContent = state.name ? `Hola, ${state.name}` : '';
+}
+
 // ---------- Fichar ----------
 function punch(source) {
   const now = new Date();
@@ -38,15 +63,15 @@ function punch(source) {
     open.forgotten = true;
     state.sessions.push({ id: uid(), start: now.toISOString(), end: null });
     save();
-    flash(`Entrada registrada a las ${fmtTime(now)}. Ojo: la jornada del ${fmtDay(new Date(open.start))} quedó sin salida, corrígela en el historial.`, 'warn');
+    flash(`¡Hola${who()}! Entrada registrada a las ${fmtTime(now)}. Ojo: la jornada del ${fmtDay(new Date(open.start))} quedó sin salida, corrígela en el historial.`, 'warn');
   } else if (open) {
     open.end = now.toISOString();
     save();
-    flash(`Salida registrada a las ${fmtTime(now)} · trabajaste ${fmtDur(now - Date.parse(open.start))}`, 'out');
+    flash(`¡Hasta luego${who()}! Salida registrada a las ${fmtTime(now)} · trabajaste ${fmtDur(now - Date.parse(open.start))}`, 'out');
   } else {
     state.sessions.push({ id: uid(), start: now.toISOString(), end: null });
     save();
-    flash(`Entrada registrada a las ${fmtTime(now)}. ¡Buena jornada!`, 'in');
+    flash(`¡Hola${who()}, bienvenido al trabajo! Entrada registrada a las ${fmtTime(now)}.`, 'in');
   }
   render();
 }
@@ -298,6 +323,8 @@ $('#restoreInput').addEventListener('change', async e => {
     if (!Array.isArray(data.sessions)) throw new Error('formato');
     if (!confirm(`Se reemplazarán tus datos por ${data.sessions.length} jornadas de la copia. ¿Continuar?`)) return;
     state.sessions = data.sessions.filter(s => s && typeof s.start === 'string');
+    if (typeof data.name === 'string' && data.name.trim()) state.name = data.name.trim();
+    renderName();
     save();
     render();
     flash('Copia restaurada.');
@@ -349,6 +376,7 @@ $('#menu').addEventListener('click', e => {
   if (action === 'csv') exportCsv();
   if (action === 'backup') backup();
   if (action === 'restore') $('#restoreInput').click();
+  if (action === 'name') askName();
   if (action === 'nfc') {
     $('#tapUrl').textContent = tapUrl();
     $('#nfcMsg').textContent = '';
@@ -362,14 +390,17 @@ setInterval(() => { if (!document.hidden) { renderStatus(); renderTotals(); } },
 
 // ---------- Inicio ----------
 render();
+renderName();
 
 // El sticker NFC abre la app con ?tap=1 → fichamos y limpiamos la URL
 // para que recargar la página no vuelva a fichar.
-const params = new URLSearchParams(location.search);
-if (params.has('tap')) {
-  history.replaceState(null, '', location.pathname);
-  punch('tap');
-}
+// La primera vez pedimos el nombre antes de fichar, para poder saludar.
+(async () => {
+  const tapped = new URLSearchParams(location.search).has('tap');
+  if (tapped) history.replaceState(null, '', location.pathname);
+  if (!state.name) await askName();
+  if (tapped) punch('tap');
+})();
 
 if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

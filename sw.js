@@ -1,5 +1,5 @@
 // Permite abrir la app sin conexión (por ejemplo, sin cobertura en la oficina).
-const CACHE = 'cronos-v1';
+const CACHE = 'cronos-v2';
 const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icons/icon.svg'];
 
 self.addEventListener('install', e => {

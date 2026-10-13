@@ -14,7 +14,10 @@
 </head>
 <body>
   <header class="top">
-    <h1>Cronos</h1>
+    <div>
+      <h1>Cronos</h1>
+      <p id="greeting" class="greeting"></p>
+    </div>
     <button id="menuBtn" class="icon-btn" aria-label="Opciones">⋯</button>
   </header>
 
@@ -53,6 +56,7 @@
     <button data-action="csv">📄 Exportar CSV (Excel)</button>
     <button data-action="backup">💾 Copia de seguridad (JSON)</button>
     <button data-action="restore">📥 Restaurar copia</button>
+    <button data-action="name">👤 Cambiar mi nombre</button>
     <button data-action="nfc">📡 Configurar sticker NFC</button>
     <button data-action="close" class="ghost">Cerrar</button>
     <input type="file" id="restoreInput" accept="application/json,.json" hidden>
@@ -72,6 +76,17 @@
         <button value="cancel" class="ghost" formnovalidate>Cancelar</button>
         <button value="save" id="edSave" class="primary small">Guardar</button>
       </div>
+    </form>
+  </dialog>
+
+  <!-- Nombre de quien usa este teléfono -->
+  <dialog id="nameDialog" class="sheet">
+    <form method="dialog">
+      <h2>¿Cómo te llamas?</h2>
+      <p class="hint">Así la app te saludará cada vez que pases el teléfono por el sticker.
+        Cada persona usa su propio teléfono y ve solo sus horas.</p>
+      <label>Tu nombre <input type="text" id="nameInput" maxlength="40" autocomplete="given-name" placeholder="Ej.: Wilfredo"></label>
+      <div class="row"><span class="spacer"></span><button class="primary small">Guardar</button></div>
     </form>
   </dialog>
 

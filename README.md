@@ -45,6 +45,17 @@ Abre la app en el móvil y ve a **⋯ → Configurar sticker NFC**. Ahí verás 
 
 > **iPhone:** no la añadas a la pantalla de inicio. En iPhone, la app de la pantalla de inicio y Safari guardan datos por separado, y el sticker siempre abre Safari. Usa simplemente Safari. Si quieres un acceso directo, guárdala en Favoritos.
 
+## Varias personas, un mismo sticker
+
+Todos pueden usar el mismo sticker. Cada persona lo pasa con **su propio teléfono**, y cada teléfono guarda solo las horas de su dueño.
+
+La primera vez, la app pregunta **"¿Cómo te llamas?"**. Desde entonces saluda a esa persona:
+
+- Al entrar: *"¡Hola, Juan, bienvenido al trabajo! Entrada registrada a las 8:00."*
+- Al salir: *"¡Hasta luego, Juan! Salida registrada a las 17:00 · trabajaste 9h 00m."*
+
+Para cambiar el nombre: **⋯ → Cambiar mi nombre**.
+
 ## Otras funciones (menú ⋯)
 
 - **Añadir jornada manual:** para los días en que olvidaste el teléfono.

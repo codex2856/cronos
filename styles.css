@@ -124,3 +124,4 @@ dialog label input { display: block; width: 100%; margin-top: 4px; }
   border: 1px solid var(--line); word-break: break-all; font-size: .85rem;
 }
 [data-close] { width: 100%; margin-top: 12px; }
+.greeting { margin: 0; color: var(--muted); font-size: .9rem; }
