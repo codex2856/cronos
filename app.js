@@ -403,4 +403,4 @@ renderName();
 })();
 
 if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});

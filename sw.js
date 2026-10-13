@@ -1,5 +1,5 @@
 // Permite abrir la app sin conexión (por ejemplo, sin cobertura en la oficina).
-const CACHE = 'cronos-v2';
+const CACHE = 'cronos-v3';
 const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icons/icon.svg'];
 
 self.addEventListener('install', e => {
@@ -18,7 +18,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request)
+    // 'no-cache' revalida con el servidor y evita que el navegador sirva una versión vieja.
+    fetch(e.request, { cache: 'no-cache' })
       .then(res => {
         if (res.ok && new URL(e.request.url).origin === location.origin) {
           const copy = res.clone();
