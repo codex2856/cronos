@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Cronos">
-  <title>Cronos · Registro de horas</title>
+  <title>Cronos · Time Tracker</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon.svg">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <header class="top">
@@ -18,32 +18,32 @@
       <h1>Cronos</h1>
       <p id="greeting" class="greeting"></p>
     </div>
-    <button id="menuBtn" class="icon-btn" aria-label="Opciones">⋯</button>
+    <button id="menuBtn" class="icon-btn" aria-label="Options">⋯</button>
   </header>
 
   <main>
     <section id="flash" class="flash" hidden></section>
 
     <section class="card status">
-      <p id="statusLabel" class="status-label">Fuera del trabajo</p>
+      <p id="statusLabel" class="status-label">Off the clock</p>
       <p id="statusTimer" class="status-timer">--:--:--</p>
       <p id="statusSince" class="status-since"></p>
-      <button id="toggleBtn" class="primary">Registrar entrada</button>
-      <p class="hint">También puedes acercar el teléfono al sticker NFC.</p>
+      <button id="toggleBtn" class="primary">Clock in</button>
+      <p class="hint">You can also tap your phone on the NFC sticker.</p>
     </section>
 
     <section class="card">
       <div class="totals">
-        <div><span class="t-label">Hoy</span><span id="totToday" class="t-val">0h 00m</span></div>
-        <div><span class="t-label">Esta semana</span><span id="totWeek" class="t-val">0h 00m</span></div>
-        <div><span class="t-label">Este mes</span><span id="totMonth" class="t-val">0h 00m</span></div>
+        <div><span class="t-label">Today</span><span id="totToday" class="t-val">0h 00m</span></div>
+        <div><span class="t-label">This week</span><span id="totWeek" class="t-val">0h 00m</span></div>
+        <div><span class="t-label">This month</span><span id="totMonth" class="t-val">0h 00m</span></div>
       </div>
     </section>
 
     <section class="card">
       <div class="list-head">
-        <h2>Historial</h2>
-        <select id="monthSelect" aria-label="Mes"></select>
+        <h2>History</h2>
+        <select id="monthSelect" aria-label="Month"></select>
       </div>
       <div id="history"></div>
     </section>
@@ -51,31 +51,31 @@
 
   <!-- Menú de opciones -->
   <dialog id="menu" class="sheet">
-    <h2>Opciones</h2>
-    <button data-action="add">➕ Añadir jornada manual</button>
-    <button data-action="csv">📄 Exportar CSV (Excel)</button>
-    <button data-action="backup">💾 Copia de seguridad (JSON)</button>
-    <button data-action="restore">📥 Restaurar copia</button>
-    <button data-action="name">👤 Cambiar mi nombre</button>
-    <button data-action="nfc">📡 Configurar sticker NFC</button>
-    <button data-action="reset" class="danger">🗑️ Borrar todo el historial</button>
-    <button data-action="close" class="ghost">Cerrar</button>
+    <h2>Options</h2>
+    <button data-action="add">➕ Add shift manually</button>
+    <button data-action="csv">📄 Export CSV (Excel)</button>
+    <button data-action="backup">💾 Backup (JSON)</button>
+    <button data-action="restore">📥 Restore backup</button>
+    <button data-action="name">👤 Change my name</button>
+    <button data-action="nfc">📡 Set up NFC sticker</button>
+    <button data-action="reset" class="danger">🗑️ Delete all history</button>
+    <button data-action="close" class="ghost">Close</button>
     <input type="file" id="restoreInput" accept="application/json,.json" hidden>
   </dialog>
 
   <!-- Editar / añadir jornada -->
   <dialog id="editor" class="sheet">
     <form method="dialog" id="editorForm">
-      <h2 id="editorTitle">Editar jornada</h2>
-      <label>Entrada <input type="datetime-local" id="edStart" required></label>
-      <label>Salida <input type="datetime-local" id="edEnd"></label>
-      <label>Nota <input type="text" id="edNote" maxlength="120" placeholder="Opcional"></label>
+      <h2 id="editorTitle">Edit shift</h2>
+      <label>Clock in <input type="datetime-local" id="edStart" required></label>
+      <label>Clock out <input type="datetime-local" id="edEnd"></label>
+      <label>Note <input type="text" id="edNote" maxlength="120" placeholder="Optional"></label>
       <p id="edError" class="error" hidden></p>
       <div class="row">
-        <button type="button" id="edDelete" class="danger">Borrar</button>
+        <button type="button" id="edDelete" class="danger">Delete</button>
         <span class="spacer"></span>
-        <button value="cancel" class="ghost" formnovalidate>Cancelar</button>
-        <button value="save" id="edSave" class="primary small">Guardar</button>
+        <button value="cancel" class="ghost" formnovalidate>Cancel</button>
+        <button value="save" id="edSave" class="primary small">Save</button>
       </div>
     </form>
   </dialog>
@@ -83,30 +83,30 @@
   <!-- Nombre de quien usa este teléfono -->
   <dialog id="nameDialog" class="sheet">
     <form method="dialog">
-      <h2>¿Cómo te llamas?</h2>
-      <p class="hint">Así la app te saludará cada vez que pases el teléfono por el sticker.
-        Cada persona usa su propio teléfono y ve solo sus horas.</p>
-      <label>Tu nombre <input type="text" id="nameInput" maxlength="40" autocomplete="given-name" placeholder="Introduce tu nombre"></label>
-      <div class="row"><span class="spacer"></span><button class="primary small">Guardar</button></div>
+      <h2>What's your name?</h2>
+      <p class="hint">The app will greet you every time you tap your phone on the sticker.
+        Everyone uses their own phone and only sees their own hours.</p>
+      <label>Your name <input type="text" id="nameInput" maxlength="40" autocomplete="given-name" placeholder="Enter your name"></label>
+      <div class="row"><span class="spacer"></span><button class="primary small">Save</button></div>
     </form>
   </dialog>
 
   <!-- Configuración NFC -->
   <dialog id="nfcDialog" class="sheet">
-    <h2>Configurar sticker NFC</h2>
-    <p>Graba este enlace en el sticker. Cada vez que acerques el teléfono se registrará una entrada o una salida.</p>
+    <h2>Set up NFC sticker</h2>
+    <p>Write this link to the sticker. Every time you tap your phone on it, a clock-in or clock-out will be recorded.</p>
     <code id="tapUrl" class="url"></code>
     <div class="row">
-      <button id="copyUrl" class="ghost">Copiar enlace</button>
+      <button id="copyUrl" class="ghost">Copy link</button>
       <span class="spacer"></span>
-      <button id="writeNfc" class="primary small">Grabar sticker</button>
+      <button id="writeNfc" class="primary small">Write sticker</button>
     </div>
     <p id="nfcMsg" class="hint"></p>
-    <p class="hint">“Grabar sticker” solo funciona en Chrome para Android. En iPhone usa la app gratuita
-      <b>NFC Tools</b> → Escribir → Añadir registro → URL, y pega el enlace.</p>
-    <button data-close class="ghost">Cerrar</button>
+    <p class="hint">“Write sticker” only works in Chrome on Android. On iPhone, use the free
+      <b>NFC Tools</b> app → Write → Add a record → URL, and paste the link.</p>
+    <button data-close class="ghost">Close</button>
   </dialog>
 
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

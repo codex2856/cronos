@@ -9,6 +9,8 @@ La app guarda el historial por día, y muestra los totales de hoy, de la semana 
 
 Funciona en **iPhone y Android** y no necesita tienda de apps: es una página web que se abre sola al leer el sticker.
 
+> La app está en **inglés**. Estas instrucciones usan los nombres de los botones tal como aparecen en la app.
+
 ## Cómo funciona
 
 El sticker guarda un enlace del tipo `https://TU-USUARIO.github.io/cronos/?tap=1`.
@@ -33,9 +35,9 @@ Los datos se guardan **en tu teléfono**, en el navegador. No se envían a ning�
 
 ### 2. Grabar el sticker
 
-Abre la app en el móvil y ve a **⋯ → Configurar sticker NFC**. Ahí verás el enlace exacto que debes grabar.
+Abre la app en el móvil y ve a **⋯ → Set up NFC sticker**. Ahí verás el enlace exacto que debes grabar.
 
-- **Android (Chrome):** pulsa **Grabar sticker** y acerca el sticker al teléfono.
+- **Android (Chrome):** pulsa **Write sticker** y acerca el sticker al teléfono.
 - **iPhone (o cualquier móvil):** instala la app gratuita **NFC Tools** y ve a *Escribir → Añadir un registro → URL/URI*. Pega el enlace y pulsa *Escribir*.
 
 ### 3. Usarla
@@ -51,19 +53,19 @@ Abre la app en el móvil y ve a **⋯ → Configurar sticker NFC**. Ahí verás 
 
 Todos pueden usar el mismo sticker. Cada persona lo pasa con **su propio teléfono**, y cada teléfono guarda solo las horas de su dueño.
 
-La primera vez, la app pregunta **"¿Cómo te llamas?"**. Desde entonces saluda a esa persona:
+La primera vez, la app pregunta **"What's your name?"**. Desde entonces saluda a esa persona:
 
-- Al entrar: *"¡Hola, Juan, bienvenido al trabajo! Entrada registrada a las 8:00."*
-- Al salir: *"¡Hasta luego, Juan! Salida registrada a las 17:00 · trabajaste 9h 00m."*
+- Al entrar: *"Hi, Juan, welcome to work! Clock-in recorded at 08:00."*
+- Al salir: *"See you later, Juan! Clock-out recorded at 17:00 · you worked 9h 00m."*
 
-Para cambiar el nombre: **⋯ → Cambiar mi nombre**.
+Para cambiar el nombre: **⋯ → Change my name**.
 
 ## Otras funciones (menú ⋯)
 
-- **Añadir jornada manual:** para los días en que olvidaste el teléfono.
+- **Add shift manually:** para los días en que olvidaste el teléfono.
 - **Editar o borrar:** toca cualquier registro del historial.
-- **Exportar CSV:** exporta el mes seleccionado para abrirlo en Excel o Google Sheets.
-- **Copia de seguridad / Restaurar:** guarda un archivo JSON con todos tus datos. Úsalo para no perderlos si cambias de teléfono o borras los datos del navegador.
+- **Export CSV:** exporta el mes seleccionado para abrirlo en Excel o Google Sheets.
+- **Backup / Restore backup:** guarda un archivo JSON con todos tus datos. Úsalo para no perderlos si cambias de teléfono o borras los datos del navegador.
 
 ## Archivos
 

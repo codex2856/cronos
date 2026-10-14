@@ -47,14 +47,14 @@ function askName() {
 }
 
 function renderName() {
-  $('#greeting').textContent = state.name ? `Hola, ${state.name}` : '';
+  $('#greeting').textContent = state.name ? `Hi, ${state.name}` : '';
 }
 
 // ---------- Fichar ----------
 function punch(source) {
   const now = new Date();
   if (source === 'tap' && now - lastEventTime() < DOUBLE_TAP_MS) {
-    flash('Ya se registró hace un momento. Toque ignorado.', 'warn');
+    flash('Already recorded a moment ago. Tap ignored.', 'warn');
     return;
   }
   const open = openSession();
@@ -63,15 +63,15 @@ function punch(source) {
     open.forgotten = true;
     state.sessions.push({ id: uid(), start: now.toISOString(), end: null });
     save();
-    flash(`¡Hola${who()}! Entrada registrada a las ${fmtTime(now)}. Ojo: la jornada del ${fmtDay(new Date(open.start))} quedó sin salida, corrígela en el historial.`, 'warn');
+    flash(`Hi${who()}! Clock-in recorded at ${fmtTime(now)}. Heads up: your shift on ${fmtDay(new Date(open.start))} has no clock-out, fix it in the history.`, 'warn');
   } else if (open) {
     open.end = now.toISOString();
     save();
-    flash(`¡Hasta luego${who()}! Salida registrada a las ${fmtTime(now)} · trabajaste ${fmtDur(now - Date.parse(open.start))}`, 'out');
+    flash(`See you later${who()}! Clock-out recorded at ${fmtTime(now)} · you worked ${fmtDur(now - Date.parse(open.start))}`, 'out');
   } else {
     state.sessions.push({ id: uid(), start: now.toISOString(), end: null });
     save();
-    flash(`¡Hola${who()}, bienvenido al trabajo! Entrada registrada a las ${fmtTime(now)}.`, 'in');
+    flash(`Hi${who()}, welcome to work! Clock-in recorded at ${fmtTime(now)}.`, 'in');
   }
   render();
 }
@@ -79,7 +79,7 @@ function punch(source) {
 // ---------- Formato ----------
 const pad = n => String(n).padStart(2, '0');
 const fmtTime = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-const fmtDay = d => d.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+const fmtDay = d => d.toLocaleDateString('en', { weekday: 'long', day: 'numeric', month: 'long' });
 const dayKey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const monthKey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 function fmtDur(ms) {
@@ -126,15 +126,15 @@ function renderStatus() {
   if (open) {
     const start = new Date(open.start);
     const elapsed = Date.now() - start;
-    $('#statusLabel').textContent = elapsed > FORGOTTEN_MS ? '¿Olvidaste registrar la salida?' : 'Trabajando';
+    $('#statusLabel').textContent = elapsed > FORGOTTEN_MS ? 'Forgot to clock out?' : 'Working';
     $('#statusTimer').textContent = fmtClock(elapsed);
-    $('#statusSince').textContent = `Entrada: ${fmtDay(start)}, ${fmtTime(start)}`;
-    $('#toggleBtn').textContent = 'Registrar salida';
+    $('#statusSince').textContent = `Clocked in: ${fmtDay(start)}, ${fmtTime(start)}`;
+    $('#toggleBtn').textContent = 'Clock out';
   } else {
-    $('#statusLabel').textContent = 'Fuera del trabajo';
+    $('#statusLabel').textContent = 'Off the clock';
     $('#statusTimer').textContent = '--:--:--';
     $('#statusSince').textContent = '';
-    $('#toggleBtn').textContent = 'Registrar entrada';
+    $('#toggleBtn').textContent = 'Clock in';
   }
 }
 
@@ -165,7 +165,7 @@ function renderMonthSelect() {
     const [y, mo] = k.split('-').map(Number);
     const opt = document.createElement('option');
     opt.value = k;
-    opt.textContent = new Date(y, mo - 1, 1).toLocaleDateString('es', { month: 'long', year: 'numeric' });
+    opt.textContent = new Date(y, mo - 1, 1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
     sel.append(opt);
   });
   sel.value = months.has(current) ? current : monthKey(new Date());
@@ -204,8 +204,8 @@ function renderHistory() {
       const start = fmtTime(new Date(s.start));
       let end;
       if (s.end) end = fmtTime(new Date(s.end));
-      else if (s.forgotten) end = '<span class="warn">sin salida · toca para corregir</span>';
-      else end = 'en curso';
+      else if (s.forgotten) end = '<span class="warn">no clock-out · tap to fix</span>';
+      else end = 'in progress';
       btn.innerHTML = `<span>${start} → ${end}</span><span>${s.end ? fmtDur(duration(s)) : ''}</span>`;
       if (s.note) {
         const note = document.createElement('span');
@@ -220,7 +220,7 @@ function renderHistory() {
   }
   const foot = document.createElement('p');
   foot.className = 'hint';
-  foot.textContent = `Total del mes: ${fmtDur(monthTotal)} en ${days.size} día${days.size === 1 ? '' : 's'}.`;
+  foot.textContent = `Month total: ${fmtDur(monthTotal)} over ${days.size} day${days.size === 1 ? '' : 's'}.`;
   box.append(foot);
 }
 
@@ -235,7 +235,7 @@ function render() {
 let editing = null;
 function openEditor(session) {
   editing = session;
-  $('#editorTitle').textContent = session ? 'Editar jornada' : 'Añadir jornada';
+  $('#editorTitle').textContent = session ? 'Edit shift' : 'Add shift';
   $('#edDelete').hidden = !session;
   const now = new Date();
   $('#edStart').value = session ? toLocalInput(session.start) : `${dayKey(now)}T08:00`;
@@ -252,13 +252,13 @@ $('#editorForm').addEventListener('submit', e => {
   const err = $('#edError');
   if (end && end <= start) {
     e.preventDefault();
-    err.textContent = 'La salida debe ser posterior a la entrada.';
+    err.textContent = 'Clock-out must be after clock-in.';
     err.hidden = false;
     return;
   }
   if (!end && openSession() && openSession() !== editing) {
     e.preventDefault();
-    err.textContent = 'Ya hay una jornada en curso; indica la hora de salida.';
+    err.textContent = 'A shift is already in progress; enter a clock-out time.';
     err.hidden = false;
     return;
   }
@@ -273,7 +273,7 @@ $('#editorForm').addEventListener('submit', e => {
 });
 
 $('#edDelete').addEventListener('click', () => {
-  if (!editing || !confirm('¿Borrar esta jornada?')) return;
+  if (!editing || !confirm('Delete this shift?')) return;
   state.sessions = state.sessions.filter(s => s !== editing);
   save();
   $('#editor').close();
@@ -292,7 +292,7 @@ function download(name, content, type) {
 
 function exportCsv() {
   const month = $('#monthSelect').value;
-  const rows = [['Fecha', 'Entrada', 'Salida', 'Horas', 'Horas (decimal)', 'Nota']];
+  const rows = [['Date', 'Clock in', 'Clock out', 'Hours', 'Hours (decimal)', 'Note']];
   for (const s of state.sessions) {
     const d = new Date(s.start);
     if (monthKey(d) !== month) continue;
@@ -302,16 +302,15 @@ function exportCsv() {
       fmtTime(d),
       s.end ? fmtTime(new Date(s.end)) : '',
       s.end ? fmtDur(dur) : '',
-      s.end ? (dur / 3600000).toFixed(2).replace('.', ',') : '',
-      (s.note || '').replace(/[;\n]/g, ' '),
+      s.end ? (dur / 3600000).toFixed(2) : '',
+      (s.note || '').replace(/[,;\n"]/g, ' '),
     ]);
   }
-  // Separador ";" y coma decimal para que Excel en español lo abra bien.
-  download(`horas-${month}.csv`, '﻿' + rows.map(r => r.join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+  download(`hours-${month}.csv`, '﻿' + rows.map(r => r.join(',')).join('\r\n'), 'text/csv;charset=utf-8');
 }
 
 function backup() {
-  download(`cronos-copia-${dayKey(new Date())}.json`, JSON.stringify(state, null, 2), 'application/json');
+  download(`cronos-backup-${dayKey(new Date())}.json`, JSON.stringify(state, null, 2), 'application/json');
 }
 
 $('#restoreInput').addEventListener('change', async e => {
@@ -321,28 +320,28 @@ $('#restoreInput').addEventListener('change', async e => {
   try {
     const data = JSON.parse(await file.text());
     if (!Array.isArray(data.sessions)) throw new Error('formato');
-    if (!confirm(`Se reemplazarán tus datos por ${data.sessions.length} jornadas de la copia. ¿Continuar?`)) return;
+    if (!confirm(`Your data will be replaced with ${data.sessions.length} shifts from the backup. Continue?`)) return;
     state.sessions = data.sessions.filter(s => s && typeof s.start === 'string');
     if (typeof data.name === 'string' && data.name.trim()) state.name = data.name.trim();
     renderName();
     save();
     render();
-    flash('Copia restaurada.');
+    flash('Backup restored.');
   } catch (_) {
-    flash('El archivo no es una copia válida de Cronos.', 'warn');
+    flash('This file is not a valid Cronos backup.', 'warn');
   }
 });
 
 function resetAll() {
   if (!state.sessions.length) {
-    flash('No hay nada que borrar.');
+    flash('Nothing to delete.');
     return;
   }
-  if (!confirm(`¿Borrar las ${state.sessions.length} jornadas registradas en este teléfono? No se puede deshacer.`)) return;
+  if (!confirm(`Delete all ${state.sessions.length} shifts recorded on this phone? This can't be undone.`)) return;
   state.sessions = [];
   save();
   render();
-  flash('Historial borrado. El contador está a cero.');
+  flash('History deleted. The counter is back to zero.');
 }
 
 // ---------- NFC ----------
@@ -353,24 +352,24 @@ function tapUrl() {
 $('#writeNfc').addEventListener('click', async () => {
   const msg = $('#nfcMsg');
   if (!('NDEFReader' in window)) {
-    msg.textContent = 'Este navegador no puede grabar NFC. Usa la app NFC Tools con el enlace de arriba.';
+    msg.textContent = 'This browser can\'t write NFC. Use the NFC Tools app with the link above.';
     return;
   }
   try {
-    msg.textContent = 'Acerca el sticker a la parte trasera del teléfono…';
+    msg.textContent = 'Hold the sticker against the back of your phone…';
     await new NDEFReader().write({ records: [{ recordType: 'url', data: tapUrl() }] });
-    msg.textContent = '✅ Sticker grabado. Ya puedes pegarlo en tu mesa.';
+    msg.textContent = '✅ Sticker written. You can stick it on your desk now.';
   } catch (err) {
-    msg.textContent = `No se pudo grabar: ${err.message}`;
+    msg.textContent = `Couldn\'t write: ${err.message}`;
   }
 });
 
 $('#copyUrl').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(tapUrl());
-    $('#nfcMsg').textContent = 'Enlace copiado.';
+    $('#nfcMsg').textContent = 'Link copied.';
   } catch (_) {
-    $('#nfcMsg').textContent = 'No se pudo copiar; selecciónalo a mano.';
+    $('#nfcMsg').textContent = 'Couldn\'t copy; select it manually.';
   }
 });
 

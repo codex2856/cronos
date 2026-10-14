@@ -1,15 +1,22 @@
 {
-  "name": "Cronos · Registro de horas",
+  "name": "Cronos · Time Tracker",
   "short_name": "Cronos",
-  "description": "Registra tu entrada y salida del trabajo con un sticker NFC.",
-  "lang": "es",
+  "description": "Clock in and out of work with an NFC sticker.",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "launch_handler": { "client_mode": "focus-existing" },
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "background_color": "#f4f6f6",
   "theme_color": "#0f766e",
   "icons": [
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }
