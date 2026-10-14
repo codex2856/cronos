@@ -4,9 +4,13 @@
 const STORAGE_KEY = 'cronos.v1';
 const DOUBLE_TAP_MS = 60 * 1000;          // ignora un segundo toque en menos de 1 minuto
 const FORGOTTEN_MS = 16 * 60 * 60 * 1000; // una entrada abierta >16 h se considera "salida olvidada"
+const TASKS = ['Kast', 'Long car', 'PostNL', 'Exp. container', 'Exp. pallet', 'Inbound floor',
+  'Kantoor', 'Inbound', 'Outbound', 'Refill', 'Small car'];
+const NO_TASK = 'No task'; // tiempo fichado antes de elegir tarea
 
 // ---------- Datos ----------
-// sesión: { id, start: ISO, end: ISO|null, note?: string, forgotten?: true }
+// sesión: { id, start: ISO, end: ISO|null, note?: string, forgotten?: true,
+//           tasks?: [{ task, at: ISO }] }  ← cada cambio de tarea dentro de la jornada
 function load() {
   try {
     const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -76,6 +80,53 @@ function punch(source) {
   render();
 }
 
+// ---------- Tareas ----------
+function currentTask(s) {
+  const t = s?.tasks;
+  return t && t.length ? t[t.length - 1].task : null;
+}
+
+function chooseTask(task) {
+  let open = openSession();
+  if (!open || Date.now() - Date.parse(open.start) > FORGOTTEN_MS) {
+    punch('button'); // fichamos la entrada y empezamos directamente con esta tarea
+    open = openSession();
+    if (!open) return;
+    open.tasks = [{ task, at: open.start }];
+    save();
+    flash(`Hi${who()}, welcome to work! Clocked in at ${fmtTime(new Date(open.start))} on ${task}.`, 'in');
+    render();
+    return;
+  }
+  if (currentTask(open) === task) return;
+  const now = new Date();
+  (open.tasks ||= []).push({ task, at: now.toISOString() });
+  save();
+  flash(`Now working on ${task} (since ${fmtTime(now)}).`);
+  render();
+}
+
+// Reparte la duración de una jornada entre sus tareas → Map(tarea → ms).
+// Las horas se recortan a la jornada, así que editar entrada/salida no las descuadra.
+function taskBreakdown(s, now = Date.now()) {
+  const out = new Map();
+  if (s.forgotten && !s.end) return out;
+  const start = Date.parse(s.start);
+  const end = s.end ? Date.parse(s.end) : now;
+  const add = (task, ms) => { if (ms > 0) out.set(task, (out.get(task) || 0) + ms); };
+  const segs = (s.tasks || [])
+    .map(t => ({ task: t.task, at: Math.min(Math.max(Date.parse(t.at), start), end) }))
+    .sort((a, b) => a.at - b.at);
+  let cursor = start, current = NO_TASK;
+  for (const seg of segs) {
+    add(current, seg.at - cursor);
+    cursor = seg.at;
+    current = seg.task;
+  }
+  add(current, end - cursor);
+  return out;
+}
+
 // ---------- Formato ----------
 const pad = n => String(n).padStart(2, '0');
 const fmtTime = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -130,11 +181,57 @@ function renderStatus() {
     $('#statusTimer').textContent = fmtClock(elapsed);
     $('#statusSince').textContent = `Clocked in: ${fmtDay(start)}, ${fmtTime(start)}`;
     $('#toggleBtn').textContent = 'Clock out';
+    const task = currentTask(open);
+    $('#currentTask').textContent = task ? `Current task: ${task}` : 'Pick the task you are working on 👇';
   } else {
+    $('#currentTask').textContent = 'Pick a task to clock in on it, or use the button.';
     $('#statusLabel').textContent = 'Off the clock';
     $('#statusTimer').textContent = '--:--:--';
     $('#statusSince').textContent = '';
     $('#toggleBtn').textContent = 'Clock in';
+  }
+}
+
+function renderTaskButtons() {
+  const active = currentTask(openSession());
+  document.querySelectorAll('#taskGrid button').forEach(b => {
+    const on = b.dataset.task === active;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', on);
+  });
+}
+
+let taskPeriod = 'today';
+function renderTaskTotals() {
+  const now = new Date();
+  const inPeriod = {
+    today: d => dayKey(d) === dayKey(now),
+    week: d => d >= startOfWeek(now),
+    month: d => monthKey(d) === monthKey(now),
+  }[taskPeriod];
+  const totals = new Map();
+  for (const s of state.sessions) {
+    if (!inPeriod(new Date(s.start))) continue;
+    for (const [task, ms] of taskBreakdown(s)) totals.set(task, (totals.get(task) || 0) + ms);
+  }
+  const rows = [...totals].filter(([t]) => t !== NO_TASK).sort((a, b) => b[1] - a[1]);
+  if (totals.has(NO_TASK)) rows.push([NO_TASK, totals.get(NO_TASK)]);
+  const box = $('#taskTotals');
+  if (!rows.length) {
+    box.innerHTML = '<p class="empty">No time recorded in this period.</p>';
+    return;
+  }
+  const max = Math.max(...rows.map(r => r[1]));
+  box.innerHTML = '';
+  for (const [task, ms] of rows) {
+    const row = document.createElement('div');
+    row.className = 'task-row' + (task === NO_TASK ? ' muted' : '');
+    row.innerHTML = '<span class="task-name"></span><span class="task-bar"><span></span></span><span class="task-val"></span>';
+    row.children[0].textContent = task;
+    row.children[1].firstChild.style.width = `${Math.max(2, (ms / max) * 100)}%`;
+    row.children[2].textContent = fmtDur(ms);
+    row.title = `${task}: ${fmtDur(ms)}`;
+    box.append(row);
   }
 }
 
@@ -184,7 +281,7 @@ function renderHistory() {
     days.get(k).push(s);
   }
   if (!days.size) {
-    box.innerHTML = '<p class="empty">No hay jornadas registradas este mes.</p>';
+    box.innerHTML = '<p class="empty">No shifts recorded this month.</p>';
     return;
   }
   let monthTotal = 0;
@@ -213,6 +310,13 @@ function renderHistory() {
         note.textContent = ` · ${s.note}`;
         btn.firstChild.append(note);
       }
+      const parts = [...taskBreakdown(s)].map(([t, ms]) => `${t} ${fmtDur(ms)}`);
+      if (parts.length && !(parts.length === 1 && parts[0].startsWith(NO_TASK))) {
+        const line = document.createElement('span');
+        line.className = 'entry-tasks';
+        line.textContent = parts.join(' · ');
+        btn.append(line);
+      }
       btn.addEventListener('click', () => openEditor(s));
       day.append(btn);
     }
@@ -226,7 +330,9 @@ function renderHistory() {
 
 function render() {
   renderStatus();
+  renderTaskButtons();
   renderTotals();
+  renderTaskTotals();
   renderMonthSelect();
   renderHistory();
 }
@@ -241,9 +347,29 @@ function openEditor(session) {
   $('#edStart').value = session ? toLocalInput(session.start) : `${dayKey(now)}T08:00`;
   $('#edEnd').value = session && session.end ? toLocalInput(session.end) : (session ? '' : `${dayKey(now)}T17:00`);
   $('#edNote').value = session?.note || '';
+  $('#edTasks').innerHTML = '';
+  (session?.tasks || []).forEach(t => addTaskRow(toLocalInput(t.at), t.task));
   $('#edError').hidden = true;
   $('#editor').showModal();
 }
+
+function addTaskRow(at, task) {
+  const row = document.createElement('div');
+  row.className = 'ed-task';
+  row.innerHTML = '<input type="datetime-local" required aria-label="From"><select aria-label="Task"></select><button type="button" class="ghost" aria-label="Remove">✕</button>';
+  const [input, select, remove] = row.children;
+  input.value = at;
+  TASKS.forEach(t => select.append(new Option(t, t)));
+  select.value = task;
+  remove.addEventListener('click', () => row.remove());
+  $('#edTasks').append(row);
+}
+
+$('#edAddTask').addEventListener('click', () => {
+  const rows = $('#edTasks').children;
+  const last = rows.length ? rows[rows.length - 1].children[0].value : $('#edStart').value;
+  addTaskRow(last, TASKS[0]);
+});
 
 $('#editorForm').addEventListener('submit', e => {
   if (e.submitter?.value !== 'save') return;
@@ -262,9 +388,20 @@ $('#editorForm').addEventListener('submit', e => {
     err.hidden = false;
     return;
   }
+  const tasks = [...$('#edTasks').children].map(r => ({
+    at: fromLocalInput(r.children[0].value),
+    task: r.children[1].value,
+  })).sort((a, b) => a.at.localeCompare(b.at));
+  if (tasks.some(t => t.at < start || (end && t.at > end))) {
+    e.preventDefault();
+    err.textContent = 'Task times must be between clock-in and clock-out.';
+    err.hidden = false;
+    return;
+  }
   const s = editing || { id: uid() };
   s.start = start;
   s.end = end;
+  s.tasks = tasks.length ? tasks : undefined;
   s.note = $('#edNote').value.trim() || undefined;
   delete s.forgotten;
   if (!editing) state.sessions.push(s);
@@ -292,21 +429,25 @@ function download(name, content, type) {
 
 function exportCsv() {
   const month = $('#monthSelect').value;
-  const rows = [['Date', 'Clock in', 'Clock out', 'Hours', 'Hours (decimal)', 'Note']];
+  const cols = [...TASKS, NO_TASK];
+  const rows = [['Date', 'Clock in', 'Clock out', 'Hours', 'Hours (decimal)', ...cols.map(t => `${t} (h)`), 'Note']];
+  const hours = ms => (ms / 3600000).toFixed(2);
   for (const s of state.sessions) {
     const d = new Date(s.start);
-    if (monthKey(d) !== month) continue;
-    const dur = s.end ? duration(s) : 0;
+    if (monthKey(d) !== month || !s.end) continue;
+    const dur = duration(s);
+    const byTask = taskBreakdown(s);
     rows.push([
       dayKey(d),
       fmtTime(d),
-      s.end ? fmtTime(new Date(s.end)) : '',
-      s.end ? fmtDur(dur) : '',
-      s.end ? (dur / 3600000).toFixed(2) : '',
+      fmtTime(new Date(s.end)),
+      fmtDur(dur),
+      hours(dur),
+      ...cols.map(t => (byTask.has(t) ? hours(byTask.get(t)) : '')),
       (s.note || '').replace(/[,;\n"]/g, ' '),
     ]);
   }
-  download(`hours-${month}.csv`, '﻿' + rows.map(r => r.join(',')).join('\r\n'), 'text/csv;charset=utf-8');
+  download(`hours-${month}.csv`, '\ufeff' + rows.map(r => r.join(',')).join('\r\n'), 'text/csv;charset=utf-8');
 }
 
 function backup() {
@@ -375,6 +516,19 @@ $('#copyUrl').addEventListener('click', async () => {
 
 // ---------- Eventos ----------
 $('#toggleBtn').addEventListener('click', () => punch('button'));
+TASKS.forEach(task => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = task;
+  b.dataset.task = task;
+  b.addEventListener('click', () => chooseTask(task));
+  $('#taskGrid').append(b);
+});
+document.querySelectorAll('#taskPeriod button').forEach(b => b.addEventListener('click', () => {
+  taskPeriod = b.dataset.period;
+  document.querySelectorAll('#taskPeriod button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  renderTaskTotals();
+}));
 $('#monthSelect').addEventListener('change', renderHistory);
 $('#menuBtn').addEventListener('click', () => $('#menu').showModal());
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
@@ -398,7 +552,7 @@ $('#menu').addEventListener('click', e => {
 
 // Si la app ya estaba abierta y se vuelve a ella, refrescamos.
 document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
-setInterval(() => { if (!document.hidden) { renderStatus(); renderTotals(); } }, 1000);
+setInterval(() => { if (!document.hidden) { renderStatus(); renderTotals(); renderTaskTotals(); } }, 1000);
 
 // ---------- Inicio ----------
 render();

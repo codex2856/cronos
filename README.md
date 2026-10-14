@@ -49,6 +49,19 @@ Abre la app en el móvil y ve a **⋯ → Set up NFC sticker**. Ahí verás el e
 
 > **iPhone:** no la añadas a la pantalla de inicio. En iPhone, la app de la pantalla de inicio y Safari guardan datos por separado, y el sticker siempre abre Safari. Usa simplemente Safari. Si quieres un acceso directo, guárdala en Favoritos.
 
+## Horas por tarea
+
+En la pantalla principal hay un botón para cada tarea: Kast, Long car, PostNL, Exp. container, Exp. pallet, Inbound floor, Kantoor, Inbound, Outbound, Refill y Small car.
+
+- Toca la tarea en la que estás trabajando. Si aún no habías fichado, también registra la entrada.
+- Cuando cambies de tarea, toca la nueva. El tiempo empieza a contar para ella.
+- En **Hours per task** verás cuántas horas llevas en cada tarea: hoy, esta semana o este mes.
+- El tiempo fichado antes de elegir una tarea aparece como *No task*.
+- Si olvidaste cambiar de tarea, toca la jornada en el historial y corrige las horas en *Tasks*.
+- El CSV incluye una columna de horas por cada tarea.
+
+La lista de tareas está en `app.js` (constante `TASKS`).
+
 ## Varias personas, un mismo sticker
 
 Todos pueden usar el mismo sticker. Cada persona lo pasa con **su propio teléfono**, y cada teléfono guarda solo las horas de su dueño.

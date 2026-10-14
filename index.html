@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon.svg">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
   <header class="top">
@@ -28,6 +28,8 @@
       <p id="statusLabel" class="status-label">Off the clock</p>
       <p id="statusTimer" class="status-timer">--:--:--</p>
       <p id="statusSince" class="status-since"></p>
+      <p id="currentTask" class="current-task"></p>
+      <div id="taskGrid" class="task-grid" aria-label="Tasks"></div>
       <button id="toggleBtn" class="primary">Clock in</button>
       <p class="hint">You can also tap your phone on the NFC sticker.</p>
     </section>
@@ -38,6 +40,18 @@
         <div><span class="t-label">This week</span><span id="totWeek" class="t-val">0h 00m</span></div>
         <div><span class="t-label">This month</span><span id="totMonth" class="t-val">0h 00m</span></div>
       </div>
+    </section>
+
+    <section class="card">
+      <div class="list-head">
+        <h2>Hours per task</h2>
+        <div id="taskPeriod" class="seg" role="group" aria-label="Period">
+          <button type="button" data-period="today" aria-pressed="true">Today</button>
+          <button type="button" data-period="week" aria-pressed="false">Week</button>
+          <button type="button" data-period="month" aria-pressed="false">Month</button>
+        </div>
+      </div>
+      <div id="taskTotals"></div>
     </section>
 
     <section class="card">
@@ -69,6 +83,11 @@
       <h2 id="editorTitle">Edit shift</h2>
       <label>Clock in <input type="datetime-local" id="edStart" required></label>
       <label>Clock out <input type="datetime-local" id="edEnd"></label>
+      <fieldset class="ed-tasks">
+        <legend>Tasks (from what time)</legend>
+        <div id="edTasks"></div>
+        <button type="button" id="edAddTask" class="ghost">+ Add task change</button>
+      </fieldset>
       <label>Note <input type="text" id="edNote" maxlength="120" placeholder="Optional"></label>
       <p id="edError" class="error" hidden></p>
       <div class="row">
@@ -107,6 +126,6 @@
     <button data-close class="ghost">Close</button>
   </dialog>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

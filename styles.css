@@ -125,3 +125,30 @@ dialog label input { display: block; width: 100%; margin-top: 4px; }
 }
 [data-close] { width: 100%; margin-top: 12px; }
 .greeting { margin: 0; color: var(--muted); font-size: .9rem; }
+
+/* Tareas */
+.current-task { margin: 0 0 10px; font-weight: 600; }
+.task-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 14px; }
+.task-grid button { padding: 10px 4px; font-size: .85rem; border-radius: 10px; }
+.task-grid button.active { background: var(--accent); color: var(--accent-text); border-color: transparent; font-weight: 600; }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 6px 10px; font-size: .85rem; background: transparent; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+
+.task-row { display: grid; grid-template-columns: 7.5em 1fr 4.6em; align-items: center; gap: 8px; padding: 5px 0; font-size: .9rem; }
+.task-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task-bar { height: 10px; }
+.task-bar span { display: block; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
+.task-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.task-row.muted .task-bar span { background: var(--muted); opacity: .5; }
+.task-row.muted .task-name { color: var(--muted); }
+
+.entry { flex-wrap: wrap; }
+.entry-tasks { flex-basis: 100%; font-size: .8rem; color: var(--muted); opacity: .85; }
+
+.ed-tasks { border: 1px solid var(--line); border-radius: 10px; margin: 0 0 12px; padding: 8px 10px; }
+.ed-tasks legend { color: var(--muted); font-size: .9rem; padding: 0 4px; }
+.ed-task { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; margin-bottom: 6px; }
+.ed-task input, .ed-task select { min-width: 0; font-size: .85rem; padding: 6px; }
+.ed-task button { padding: 6px 10px; }
